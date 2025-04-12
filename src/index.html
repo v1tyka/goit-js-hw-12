@@ -10,7 +10,7 @@
   <body>
     <main>
       <div class="container">
-        <form class="search-form">
+        <form class="form">
           <input
             type="text"
             name="searchQuery"
@@ -20,9 +20,12 @@
           <button type="submit" class="search-btn">Search</button>
         </form>
       </div>
+
       <ul class="gallery"></ul>
-      <div class="loader"></div>
-      <button class="load-more hidden">Load more....</button>
+
+      <span class="loader" hidden>Loading...</span>
+
+      <button class="load-more hidden">Load More</button>
     </main>
 
     <script src="./main.js" type="module"></script>
