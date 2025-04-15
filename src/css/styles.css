@@ -103,13 +103,11 @@ input:hover {
   text-align: center;
 }
 
-/* HTML: <div class="loader"></div> */
 .loader {
   width: 100px;
   height: 10px;
   margin-left: auto;
   margin-right: auto;
-  -webkit-mask: linear-gradient(90deg, #000 70%, #0000 0) 0/20%;
   background: linear-gradient(#000 0 0) 0/0% no-repeat #ddd;
   animation: l4 2s infinite steps(6);
 }
@@ -134,4 +132,25 @@ input:hover {
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+
+.loader {
+  display: block;
+  width: 48px;
+  height: 48px;
+  border: 5px solid #ccc;
+  border-top-color: #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
