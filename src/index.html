@@ -4,34 +4,20 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Homework 12</title>
+    <title>goit-js-hw-12</title>
     <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
-    <main>
-      <div class="container">
-        <!-- Форма пошуку (з точним класом "form") -->
-        <form class="form">
-          <input
-            type="text"
-            name="searchQuery"
-            class="search-input"
-            placeholder="Search images..."
-          />
-          <button type="submit" class="search-btn">Search</button>
-        </form>
-      </div>
+    <form class="form">
+      <input type="text" name="search" required />
+      <button class="form-btn" type="submit">Search</button>
+    </form>
 
-      <!-- Галерея зображень -->
-      <ul class="gallery"></ul>
+    <ul class="gallery"></ul>
 
-      <!-- Лоадер (має бути span) -->
-      <span class="loader" hidden>Loading...</span>
+    <button class="gallery-btn" type="button">Load more</button>
+    <div class="loader hidden"></div>
 
-      <!-- Кнопка Load More з точним текстом -->
-      <button class="load-more">Load More</button>
-    </main>
-
-    <script src="./main.js" type="module"></script>
+    <script type="module" src="./main.js"></script>
   </body>
 </html>

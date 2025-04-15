@@ -1,24 +1,18 @@
 import axios from 'axios';
 
-const API_KEY = '49053882-7e244883c6f1c912e1433ba1a';
+export async function getAllImages(message, page, perPage) {
+  const baseURL = 'https://pixabay.com/api/';
 
-const BASE_URL = 'https://pixabay.com/api/';
-
-export async function fetchImages(query, page = 1, perPage = 40) {
   const params = {
-    key: API_KEY,
-    q: query,
+    key: '49074776-667ebd81d42a28579e0443e2e',
+    q: message,
     image_type: 'photo',
     orientation: 'horizontal',
-    safesearch: true,
-    page,
+    safesearch: 'true',
+    page: page,
     per_page: perPage,
   };
+  const result = await axios.get(baseURL, { params });
 
-  try {
-    const response = await axios.get(BASE_URL, { params });
-    return response.data;
-  } catch (error) {
-    throw new Error(`An error occurred: ${error.message}`);
-  }
+  return result.data;
 }
