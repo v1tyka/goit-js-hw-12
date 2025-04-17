@@ -24,12 +24,23 @@ const params = {
 hidebtnNext();
 
 refs.form.addEventListener('submit', searchImages);
-
 async function searchImages(e) {
   e.preventDefault();
-  refs.gallery.innerHTML = '';
 
   const message = e.target.elements.search.value.trim();
+
+  if (!message) {
+    iziToast.warning({
+      message: 'Please enter a search term.',
+      position: 'topRight',
+    });
+    return;
+  }
+
+  refs.gallery.innerHTML = '';
+  hidebtnNext(); // Сховати одразу
+  showLoader(); // Показати лоадер
+
   params.message = message;
   params.page = 1;
 
@@ -41,42 +52,31 @@ async function searchImages(e) {
     );
 
     if (result.hits.length === 0) {
-      hidebtnNext();
       iziToast.error({
         message:
           'Sorry, there are no images matching your search query. Please try again!',
-        messageColor: '#FFFFFF',
-        backgroundColor: '#B51B1B',
         position: 'topRight',
-        messageSize: '16px',
-        messageLineHeight: '24px',
-        maxWidth: '432px',
       });
-    } else {
-      const markup = imagesTemplate(result.hits);
-      refs.gallery.innerHTML = markup;
-      params.total = result.totalHits;
-
-      checkBtnStatus();
-
-      lightbox = new SimpleLightbox('.gallery a');
+      return;
     }
-  } catch (error) {
-    refs.gallery.innerHTML = '';
-    iziToast.error({
-      message:
-        'Sorry, there are no images matching your search query. Please try again!',
-      messageColor: '#FFFFFF',
-      backgroundColor: '#B51B1B',
-      position: 'topRight',
-      messageSize: '16px',
-      messageLineHeight: '24px',
-      maxWidth: '432px',
-    });
-    console.log(error);
-  }
 
-  e.target.reset();
+    const markup = imagesTemplate(result.hits);
+    refs.gallery.innerHTML = markup;
+    params.total = result.totalHits;
+
+    checkBtnStatus();
+
+    lightbox = new SimpleLightbox('.gallery a');
+  } catch (error) {
+    iziToast.error({
+      message: error.message || 'Something went wrong. Please try again!',
+      position: 'topRight',
+    });
+    console.error(error);
+  } finally {
+    hideLoader(); // Приховати лоадер у будь-якому випадку
+    e.target.reset();
+  }
 }
 
 refs.btnNext.addEventListener('click', async () => {

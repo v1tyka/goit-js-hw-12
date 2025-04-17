@@ -43,3 +43,28 @@ export function imageTemplate(item) {
 export function imagesTemplate(arr) {
   return arr.map(imageTemplate).join('');
 }
+export function renderGallery(images) {
+  const galleryContainer = document.querySelector('.gallery'); // вибирає контейнер для галереї
+  const galleryHTML = imagesTemplate(images); // генерує HTML для галереї
+  galleryContainer.innerHTML = galleryHTML; // вставляє HTML в контейнер
+}
+export function clearGallery() {
+  const galleryContainer = document.querySelector('.gallery');
+  galleryContainer.innerHTML = ''; // очищує контейнер
+}
+export function toggleLoader(isLoading) {
+  const loader = document.querySelector('.loader'); // елемент лоадера
+  if (isLoading) {
+    loader.classList.remove('hidden'); // показує лоадер
+  } else {
+    loader.classList.add('hidden'); // ховає лоадер
+  }
+}
+export function toggleLoadMoreButton(isVisible) {
+  const loadMoreButton = document.querySelector('.load-more'); // кнопка завантаження
+  if (isVisible) {
+    loadMoreButton.classList.remove('hidden'); // показує кнопку
+  } else {
+    loadMoreButton.classList.add('hidden'); // ховає кнопку
+  }
+}
