@@ -16,14 +16,15 @@ let lightbox;
 
 const params = {
   message: '',
-  page: null,
-  total: 1,
+  page: 1,
+  total: 0,
   perPage: 40,
 };
 
 hidebtnNext();
 
 refs.form.addEventListener('submit', searchImages);
+
 async function searchImages(e) {
   e.preventDefault();
 
@@ -38,11 +39,12 @@ async function searchImages(e) {
   }
 
   refs.gallery.innerHTML = '';
-  hidebtnNext(); // Сховати одразу
-  showLoader(); // Показати лоадер
+  hidebtnNext();
+  showLoader();
 
   params.message = message;
   params.page = 1;
+  params.total = 0;
 
   try {
     const result = await getAllImages(
@@ -64,9 +66,8 @@ async function searchImages(e) {
     refs.gallery.innerHTML = markup;
     params.total = result.totalHits;
 
-    checkBtnStatus();
-
     lightbox = new SimpleLightbox('.gallery a');
+    checkBtnStatus();
   } catch (error) {
     iziToast.error({
       message: error.message || 'Something went wrong. Please try again!',
@@ -74,38 +75,60 @@ async function searchImages(e) {
     });
     console.error(error);
   } finally {
-    hideLoader(); // Приховати лоадер у будь-якому випадку
+    hideLoader();
     e.target.reset();
   }
 }
 
-refs.btnNext.addEventListener('click', async () => {
+refs.btnNext.addEventListener('click', loadMoreImages);
+
+async function loadMoreImages() {
+  const maxPage = Math.ceil(params.total / params.perPage);
+  if (params.page >= maxPage) return;
+
+  params.page += 1;
   hidebtnNext();
   showLoader();
-  params.page += 1;
 
   try {
-    const result2 = await getAllImages(
+    const result = await getAllImages(
       params.message,
       params.page,
       params.perPage
     );
 
-    const markup = imagesTemplate(result2.hits);
+    const markup = imagesTemplate(result.hits);
     refs.gallery.insertAdjacentHTML('beforeend', markup);
     lightbox.refresh();
-    hideLoader();
-    checkBtnStatus();
+
     scrollPage();
+    checkBtnStatus();
   } catch (error) {
     iziToast.error({
       title: 'Error',
       message: 'Something went wrong. Please try again.',
       position: 'topRight',
     });
+  } finally {
     hideLoader();
   }
-});
+}
+
+function checkBtnStatus() {
+  const maxPage = Math.ceil(params.total / params.perPage);
+
+  if (params.page < maxPage) {
+    showbtnNext();
+  } else {
+    hidebtnNext();
+    if (params.page !== 1) {
+      iziToast.info({
+        position: 'topRight',
+        message: "We're sorry, but you've reached the end of search results.",
+      });
+    }
+  }
+}
 
 function showLoader() {
   refs.loader.classList.remove('hidden');
@@ -116,32 +139,24 @@ function hideLoader() {
 }
 
 function showbtnNext() {
-  refs.btnNext.style.display = '';
+  if (refs.btnNext.style.display === 'none') {
+    refs.btnNext.style.display = '';
+  }
 }
 
 function hidebtnNext() {
-  refs.btnNext.style.display = 'none';
-}
-
-function checkBtnStatus() {
-  const maxPage = Math.ceil(params.total / params.perPage);
-
-  if (params.page >= maxPage || params.total < params.perPage) {
-    hidebtnNext();
-    iziToast.info({
-      position: 'topRight',
-      message: "We're sorry, but you've reached the end of search results.",
-    });
-  } else {
-    showbtnNext();
+  if (refs.btnNext.style.display !== 'none') {
+    refs.btnNext.style.display = 'none';
   }
 }
 
 function scrollPage() {
-  const info = refs.gallery.firstElementChild.getBoundingClientRect();
-  const height = info.height;
+  const firstCard = refs.gallery.firstElementChild;
+  if (!firstCard) return;
+
+  const { height } = firstCard.getBoundingClientRect();
   window.scrollBy({
-    behavior: 'smooth',
     top: height * 2,
+    behavior: 'smooth',
   });
 }
