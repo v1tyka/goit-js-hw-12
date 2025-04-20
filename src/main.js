@@ -24,6 +24,7 @@ const params = {
 hidebtnNext();
 
 refs.form.addEventListener('submit', searchImages);
+refs.btnNext.addEventListener('click', loadMoreImages);
 
 async function searchImages(e) {
   e.preventDefault();
@@ -67,6 +68,8 @@ async function searchImages(e) {
     params.total = result.totalHits;
 
     lightbox = new SimpleLightbox('.gallery a');
+    lightbox.refresh();
+
     checkBtnStatus();
   } catch (error) {
     iziToast.error({
@@ -79,8 +82,6 @@ async function searchImages(e) {
     e.target.reset();
   }
 }
-
-refs.btnNext.addEventListener('click', loadMoreImages);
 
 async function loadMoreImages() {
   const maxPage = Math.ceil(params.total / params.perPage);
@@ -121,7 +122,8 @@ function checkBtnStatus() {
     showbtnNext();
   } else {
     hidebtnNext();
-    if (params.page !== 1) {
+
+    if (params.page !== 1 && params.total > 0) {
       iziToast.info({
         position: 'topRight',
         message: "We're sorry, but you've reached the end of search results.",
