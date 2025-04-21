@@ -65,7 +65,9 @@ async function searchImages(e) {
 
     const markup = imagesTemplate(result.hits);
     refs.gallery.innerHTML = markup;
-    params.total = result.totalHits;
+
+    // Обмеження до 500
+    params.total = Math.min(result.totalHits, 500);
 
     lightbox = new SimpleLightbox('.gallery a');
     lightbox.refresh();
@@ -123,12 +125,10 @@ function checkBtnStatus() {
   } else {
     hidebtnNext();
 
-    if (params.page !== 1 && params.total > 0) {
-      iziToast.info({
-        position: 'topRight',
-        message: "We're sorry, but you've reached the end of search results.",
-      });
-    }
+    iziToast.info({
+      position: 'topRight',
+      message: "You've reached the end of search results.",
+    });
   }
 }
 
