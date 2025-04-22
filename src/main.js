@@ -39,13 +39,8 @@ async function searchImages(e) {
     return;
   }
 
-  refs.gallery.innerHTML = '';
-  hidebtnNext();
+  resetGalleryState(message);
   showLoader();
-
-  params.message = message;
-  params.page = 1;
-  params.total = 0;
 
   try {
     const result = await getAllImages(
@@ -53,6 +48,8 @@ async function searchImages(e) {
       params.page,
       params.perPage
     );
+
+    validateApiResponse(result);
 
     if (result.hits.length === 0) {
       iziToast.error({
@@ -63,22 +60,16 @@ async function searchImages(e) {
       return;
     }
 
-    const markup = imagesTemplate(result.hits);
-    refs.gallery.innerHTML = markup;
-
-    // Обмеження до 500
-    params.total = Math.min(result.totalHits, 500);
+    params.total = Math.min(result.totalHits, 500); // Pixabay API limit
+    refs.gallery.innerHTML = imagesTemplate(result.hits);
 
     lightbox = new SimpleLightbox('.gallery a');
     lightbox.refresh();
 
     checkBtnStatus();
   } catch (error) {
-    iziToast.error({
-      message: error.message || 'Something went wrong. Please try again!',
-      position: 'topRight',
-    });
-    console.error(error);
+    showErrorToast(error);
+    console.error('Search Error:', error);
   } finally {
     hideLoader();
     e.target.reset();
@@ -87,11 +78,15 @@ async function searchImages(e) {
 
 async function loadMoreImages() {
   const maxPage = Math.ceil(params.total / params.perPage);
-  if (params.page >= maxPage) return;
+
+  if (params.page >= maxPage) {
+    hidebtnNext();
+    return;
+  }
 
   params.page += 1;
-  hidebtnNext();
   showLoader();
+  hidebtnNext();
 
   try {
     const result = await getAllImages(
@@ -100,18 +95,16 @@ async function loadMoreImages() {
       params.perPage
     );
 
-    const markup = imagesTemplate(result.hits);
-    refs.gallery.insertAdjacentHTML('beforeend', markup);
+    validateApiResponse(result);
+
+    refs.gallery.insertAdjacentHTML('beforeend', imagesTemplate(result.hits));
     lightbox.refresh();
 
     scrollPage();
     checkBtnStatus();
   } catch (error) {
-    iziToast.error({
-      title: 'Error',
-      message: 'Something went wrong. Please try again.',
-      position: 'topRight',
-    });
+    showErrorToast(error);
+    console.error('Load More Error:', error);
   } finally {
     hideLoader();
   }
@@ -124,11 +117,22 @@ function checkBtnStatus() {
     showbtnNext();
   } else {
     hidebtnNext();
+    if (params.total > 0) {
+      iziToast.info({
+        position: 'topRight',
+        message: "You've reached the end of search results.",
+      });
+    }
+  }
+}
 
-    iziToast.info({
-      position: 'topRight',
-      message: "You've reached the end of search results.",
-    });
+function validateApiResponse(result) {
+  if (
+    !result ||
+    typeof result.totalHits !== 'number' ||
+    !Array.isArray(result.hits)
+  ) {
+    throw new Error('Invalid API response structure');
   }
 }
 
@@ -141,15 +145,11 @@ function hideLoader() {
 }
 
 function showbtnNext() {
-  if (refs.btnNext.style.display === 'none') {
-    refs.btnNext.style.display = '';
-  }
+  refs.btnNext.style.display = '';
 }
 
 function hidebtnNext() {
-  if (refs.btnNext.style.display !== 'none') {
-    refs.btnNext.style.display = 'none';
-  }
+  refs.btnNext.style.display = 'none';
 }
 
 function scrollPage() {
@@ -160,5 +160,20 @@ function scrollPage() {
   window.scrollBy({
     top: height * 2,
     behavior: 'smooth',
+  });
+}
+
+function resetGalleryState(message) {
+  refs.gallery.innerHTML = '';
+  hidebtnNext();
+  params.message = message;
+  params.page = 1;
+  params.total = 0;
+}
+
+function showErrorToast(error) {
+  iziToast.error({
+    message: error?.message || 'Something went wrong. Please try again!',
+    position: 'topRight',
   });
 }
